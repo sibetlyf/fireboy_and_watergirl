@@ -8,12 +8,21 @@
   var remoteInput = { left:false, right:false, up:false }, localInput = { left:false, right:false, up:false }, last = '';
   var card = null;
   var adventureReady=false, adventureStarted=false, lastAdventureLevel='';
+  var adventureLevels=[];
 
   function game(){ return window.PIXI && window.PIXI.game; }
   function level(){ return game() && game().level; }
   function character(which){ var l=level(); return which === 'fire' ? l && l.pers1 : l && l.pers2; }
   function send(data){ if(socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(data)); }
   function escapeText(value){ return String(value ?? '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function showAdventurePicker(){
+    var picker=document.getElementById('adventure-picker');if(picker||role!=='fire')return;
+    picker=document.createElement('section');picker.id='adventure-picker';picker.innerHTML='<div class="picker-shell"><h2>选择联机关卡</h2><p>选择神庙与关卡后，两台设备将同步进入。</p><div class="picker-tabs"></div><div class="picker-levels">正在载入关卡…</div></div>';document.body.appendChild(picker);
+    var temples=['forest','fire','water','ice','light','wind','crystal'];Promise.all(temples.map(function(id){return fetch('data/elements/'+id+'/temple.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(id);return r.json()})})).then(function(data){adventureLevels=data;renderAdventurePicker(picker,data[0]);var tabs=picker.querySelector('.picker-tabs');data.forEach(function(temple){var b=document.createElement('button');b.textContent=temple.label;b.onclick=function(){renderAdventurePicker(picker,temple)};tabs.appendChild(b)});}).catch(function(){picker.querySelector('.picker-levels').textContent='关卡列表加载失败，请刷新后重试。'});
+  }
+  function renderAdventurePicker(picker,temple){var list=picker.querySelector('.picker-levels');list.innerHTML='';temple.levels.forEach(function(item,index){var b=document.createElement('button');b.className='adventure-level';b.textContent=(index+1)+'. '+(item.extra?'额外关卡':'关卡')+' · '+Math.round(item.time||0)+' 秒';b.onclick=function(){selectAdventureLevel(item,temple)};list.appendChild(b)});}
+  function selectAdventureLevel(data,temple){if(adventureStarted)return;adventureStarted=true;var picker=document.getElementById('adventure-picker');if(picker)picker.remove();send({type:'level-start',level:data});launchAdventureLocal(data,temple);}
+  function launchAdventureLocal(data,temple){function launch(LevelState){var g=game();if(!g||!g.state||g.state.current!=='menu'||!g.cache.getBitmapFont('font'))return setTimeout(function(){launch(LevelState)},250);g.settings.controls='keyboard';if(g.settingsSignal)g.settingsSignal.dispatch('controls');g.currentTemple={id:temple&&temple.id||(data.elements&&data.elements[0])||'forest',label:temple&&temple.label||'Temple',elements:data.elements||[temple&&temple.id||'forest']};g.state.add('level',LevelState);g.state.start('level',true,false,data)}function requireLevel(){if(!window.require)return setTimeout(requireLevel,200);window.require(['States/Level/Level'],launch)}requireLevel();}
 
   function panel(){
     var n=document.getElementById('device-panel'); if(n)return n;
@@ -39,8 +48,8 @@
     document.documentElement.classList.add('in-game');
   }
   function startAdventureMenu(){
-    adventureReady=true; status(role==='fire'?'请选择任意关卡，队友会同步进入':'等待房主选择关卡…');
-    controls().classList.add('visible'); enterGameMode();
+    adventureReady=true; controls().classList.add('visible'); enterGameMode();
+    if(role==='fire')showAdventurePicker();
   }
   function hookAdventureSelection(){
     var g=game(); if(mode!=='adventure'||role!=='fire'||!adventureReady||!g||!g.state||g.state.__adventureSyncHooked)return;
@@ -57,9 +66,7 @@
   }
   function startWhenReady(){ if(mode==='adventure') return startAdventureMenu(); window.__firstLevelStartRequested=true; window.dispatchEvent(new Event('first-level:start')); controls().classList.add('visible'); enterGameMode(); }
   function launchAdventureLevel(data){
-    if(role!=='water'||!data||adventureStarted)return; adventureStarted=true;
-    function launch(LevelState){var g=game();if(!g||!g.state||g.state.current!=='menu'||!g.cache.getBitmapFont('font'))return setTimeout(function(){launch(LevelState);},250);g.settings.controls='keyboard';if(g.settingsSignal)g.settingsSignal.dispatch('controls');g.currentTemple={id:(data.elements&&data.elements[0])||'forest',label:'Temple',elements:data.elements||['forest']};g.state.add('level',LevelState);g.state.start('level',true,false,data);}
-    function requireLevel(){if(!window.require)return setTimeout(requireLevel,200);window.require(['States/Level/Level'],launch);} requireLevel();
+    if(role!=='water'||!data||adventureStarted)return; adventureStarted=true;launchAdventureLocal(data,null);
   }
   function connect(){ socket=new WebSocket((location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'/ws'); socket.onopen=function(){status(invitedMessageGuest?'正在加入寄语房间…':(roomCode.length>=4?'正在加入房间…':'请选择创建或加入'));if(roomCode.length>=4)send({type:'join',mode:mode,roomId:roomCode});};socket.onclose=function(){status('已断开，重连中…');setTimeout(connect,1200);};socket.onmessage=function(e){var m=JSON.parse(e.data);if(m.type==='joined'){role=m.role;roomCode=m.roomId||roomCode;var input=panel().querySelector('#device-room');if(input)input.value=roomCode;if(m.owner)showInvite();if(!invitedMessageGuest)status('你控制：'+(role==='fire'?'火人（房主）':'冰人'));}else if(m.type==='room'){if(m.card)saveCard(m.card);if(m.isReady){if(mode==='message'&&!invitedMessageGuest)status('队友已就绪，正在进入第一关');startWhenReady();}else if(!invitedMessageGuest)status(mode==='adventure'?'等待联机队友（1/2）':'等待受邀玩家（1/2）');}else if(m.type==='level-start'&&mode==='adventure')launchAdventureLevel(m.level);else if(m.type==='input'&&role==='fire')remoteInput=m.input;else if(m.type==='state'&&role==='water')apply(m.state);else if(m.type==='error')status(m.message);}; }
   function setInput(which,v){var x=character(which)?.cursors;if(!x)return;['left','right','up'].forEach(function(k){if(x[k])x[k].isDown=!!v[k];});} function snapshot(c){if(!c?.body)return null;var v=c.body.data.GetLinearVelocity();return{x:c.body.x,y:c.body.y,vx:v.x,vy:v.y};} function apply(s){var l=level();if(!l||!s)return;['fire','water'].forEach(function(k){var c=k==='fire'?l.pers1:l.pers2,d=s[k];if(c&&d){c.body.x=d.x;c.body.y=d.y;c.body.data.SetLinearVelocity(new box2d.b2Vec2(d.vx||0,d.vy||0));}});}
