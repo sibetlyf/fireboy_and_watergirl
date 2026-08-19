@@ -9,6 +9,8 @@ const root = resolve('新建文件夹 (2)');
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const host = process.env.HOST ?? '0.0.0.0';
 const rooms = new RoomManager();
+const finaleCards = new Map();
+const FINALE_CARD_TTL_MS = 24 * 60 * 60 * 1000;
 const clients = new Map();
 const mimeTypes = { '.css':'text/css; charset=utf-8','.fnt':'text/plain; charset=utf-8','.html':'text/html; charset=utf-8','.ico':'image/x-icon','.jpeg':'image/jpeg','.jpg':'image/jpeg','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.mp3':'audio/mpeg','.png':'image/png','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8' };
 
@@ -23,8 +25,25 @@ function sendRoom(room) { for (const player of room.players.values()) send(clien
 function relay(room, sender, payload) { for (const player of room.players.values()) { const socket = clients.get(player.id)?.socket; if (socket !== sender) send(socket, payload); } }
 function detach(playerId) { const client = clients.get(playerId); if (!client?.roomId) return clients.delete(playerId); const room = rooms.leave(client.roomId, playerId); clients.delete(playerId); if (room) sendRoom(room); }
 
+function getFinaleCard(roomId) {
+  const entry = finaleCards.get(roomId);
+  if (!entry) return null;
+  if (entry.expiresAt < Date.now()) { finaleCards.delete(roomId); return null; }
+  return entry.card;
+}
+function saveFinaleCard(room) {
+  if (room.mode === 'message') finaleCards.set(room.id, { card:room.card, expiresAt:Date.now() + FINALE_CARD_TTL_MS });
+}
+
 const server = createServer((request, response) => {
-  const filePath = safePath(new URL(request.url, `http://${request.headers.host}`).pathname);
+  const url = new URL(request.url, `http://${request.headers.host}`);
+  const cardMatch = /^\/api\/rooms\/([A-Za-z0-9]{4,8})\/card$/.exec(url.pathname);
+  if (request.method === 'GET' && cardMatch) {
+    const card = getFinaleCard(cardMatch[1].toUpperCase());
+    if (!card) { response.writeHead(404, { 'Content-Type':'application/json; charset=utf-8' }); response.end(JSON.stringify({ error:'未找到或已过期的寄语房间' })); return; }
+    response.writeHead(200, { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store' }); response.end(JSON.stringify({ card })); return;
+  }
+  const filePath = safePath(url.pathname);
   if (!filePath || !existsSync(filePath) || !statSync(filePath).isFile()) { response.writeHead(404, { 'Content-Type':'text/plain; charset=utf-8' }); response.end('未找到资源'); return; }
   response.writeHead(200, { 'Content-Type': mimeTypes[extname(filePath).toLowerCase()] ?? 'application/octet-stream', 'Cache-Control':'no-store' });
   createReadStream(filePath).pipe(response);
@@ -39,7 +58,7 @@ wss.on('connection', (socket) => {
     try {
       if (message.type === 'create') {
         detach(playerId); clients.set(playerId, { socket, roomId:null });
-        const created = rooms.create({ mode:message.mode, card:message.card }, playerId); clients.get(playerId).roomId = created.room.id;
+        const created = rooms.create({ mode:message.mode, card:message.card }, playerId); saveFinaleCard(created.room); clients.get(playerId).roomId = created.room.id;
         send(socket, { type:'joined', roomId:created.room.id, role:created.role, owner:true }); sendRoom(created.room); return;
       }
       if (message.type === 'join') {
