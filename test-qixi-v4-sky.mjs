@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const page = readFileSync('新建文件夹 (2)/qixi-finale.html', 'utf8');
+assert.match(page, /three\.js/);
+assert.match(page, /THREE\.Points/);
+assert.match(page, /particle-canvas/);
+assert.match(page, /shapeCycle/);
+assert.match(page, /setInterval.*5000/);
+assert.match(page, /star-field/);
+assert.match(page, /createStars/);
+assert.match(page, /shooting-star/);
+assert.match(page, /taurus-constellation/);
+assert.match(page, /cancer-constellation/);
+assert.match(page, /金牛座/);
+assert.match(page, /巨蟹座/);
+assert.match(page, /fire-complete-0\.png/);
+assert.match(page, /water-complete-0\.png/);
+assert.match(page, /card-cover/);
+console.log('七夕星空、双星座与 5 秒粒子形态检查通过');
