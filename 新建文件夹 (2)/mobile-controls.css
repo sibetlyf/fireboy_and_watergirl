@@ -1,0 +1,4 @@
+#device-panel { position:fixed; z-index:10000; top:12px; left:12px; width:min(260px,calc(100vw - 24px)); padding:11px; border:1px solid #f5d47b; border-radius:10px; color:#fff6d8; background:rgba(14,24,42,.86); box-shadow:0 5px 18px rgba(0,0,0,.35); font:14px/1.35 "Microsoft YaHei",sans-serif; }
+#device-panel strong { color:#ffe184; font-size:16px; } #device-panel p,#device-panel small { display:block; margin:5px 0; } #device-panel small { color:#b9cce0; }
+#device-panel input,#device-panel button { box-sizing:border-box; width:100%; min-height:34px; margin-top:6px; border-radius:6px; font:inherit; } #device-panel input { padding:0 8px; border:1px solid #88bfd0; text-transform:uppercase; } #device-panel button { border:1px solid #ffdf91; color:#3b2512; background:#efa940; font-weight:700; }
+@media (max-width:700px) { #device-panel { top:6px;left:6px;width:210px;padding:8px;font-size:12px; } #device-panel small{display:none;} }
