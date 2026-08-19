@@ -22,13 +22,13 @@
     else if(mode==='adventure'){n.innerHTML='<strong>双设备闯关</strong><p id="device-status">连接中…</p><section class="host-card"><b>房主创建联机房间</b><button id="create-room">生成闯关房间并邀请</button></section><div class="join-card"><input id="device-room" maxlength="8" placeholder="输入邀请码加入"><button id="join-room">加入闯关房间</button></div><div id="invite-box" hidden><small>分享邀请链接</small><input id="invite-link" readonly><button id="copy-invite">复制邀请</button></div><small>房主可在菜单选择任意关卡；两台设备同步进入。</small>';}
     else{n.innerHTML='<strong>寄语模式 · 双设备合作</strong><p id="device-status">连接中…</p><section class="host-card"><b>创建专属贺卡</b><input id="card-to" maxlength="24" placeholder="贺卡给谁，例如：洛小白"><textarea id="card-message" maxlength="160" placeholder="写下想说的话"></textarea><input id="card-from" maxlength="24" placeholder="落款，例如：—— 与你同行"><button id="create-room">生成房间并邀请</button></section><div class="join-card"><input id="device-room" maxlength="8" placeholder="输入邀请码加入"><button id="join-room">加入第一关</button></div><div id="invite-box" hidden><small>分享邀请链接</small><input id="invite-link" readonly><button id="copy-invite">复制邀请</button></div><small>房主控制火人，受邀玩家控制冰人</small>';}
     document.body.appendChild(n);var roomInput=n.querySelector('#device-room');if(roomInput)roomInput.value=roomCode;
-    var create=n.querySelector('#create-room');if(create)create.onclick=function(){if(window.requestGameLandscape)window.requestGameLandscape();var draft={to:n.querySelector('#card-to')?.value,message:n.querySelector('#card-message')?.value,from:n.querySelector('#card-from')?.value};send({type:'create',mode:mode,card:draft});status('正在生成联机房间…');};
+    var create=n.querySelector('#create-room');if(create)create.onclick=function(){var draft={to:n.querySelector('#card-to')?.value,message:n.querySelector('#card-message')?.value,from:n.querySelector('#card-from')?.value};send({type:'create',mode:mode,card:draft});status('正在生成联机房间…');};
     var join=n.querySelector('#join-room');if(join)join.onclick=function(){joinRoom(n.querySelector('#device-room').value);};
     var copy=n.querySelector('#copy-invite');if(copy)copy.onclick=function(){var input=n.querySelector('#invite-link');input.select();navigator.clipboard?.writeText(input.value).then(function(){status('邀请链接已复制');},function(){document.execCommand('copy');status('邀请链接已复制');});};
     return n;
   }
   function status(t){ panel().querySelector('#device-status').textContent=t; }
-  function joinRoom(value){ if(window.requestGameLandscape)window.requestGameLandscape(); roomCode=String(value||'').trim().toUpperCase(); if(roomCode.length<4)return status('房间码至少 4 位'); history.replaceState(null,'',location.pathname+'?mode='+mode+'&room='+roomCode); send({type:'join',mode:mode,roomId:roomCode}); }
+  function joinRoom(value){ roomCode=String(value||'').trim().toUpperCase(); if(roomCode.length<4)return status('房间码至少 4 位'); history.replaceState(null,'',location.pathname+'?mode='+mode+'&room='+roomCode); send({type:'join',mode:mode,roomId:roomCode}); }
   function saveCard(config){ card=config; try { sessionStorage.setItem('qixi-card:'+roomCode, JSON.stringify(config)); } catch (_) {} }
   function showInvite(){ var p=panel(), box=p.querySelector('#invite-box'), link=location.origin+location.pathname+'?mode='+mode+'&room='+roomCode; p.querySelector('#invite-link').value=link; box.hidden=false; }
 
@@ -37,7 +37,6 @@
   function enterGameMode(){
     panel().classList.add('in-game');
     document.documentElement.classList.add('in-game');
-    if(window.requestGameLandscape) window.requestGameLandscape();
   }
   function startAdventureMenu(){
     adventureReady=true; status(role==='fire'?'请选择任意关卡，队友会同步进入':'等待房主选择关卡…');

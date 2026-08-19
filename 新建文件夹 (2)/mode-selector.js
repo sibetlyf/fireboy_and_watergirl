@@ -5,7 +5,6 @@
   window.__gameMode = mode === 'adventure' || mode === 'message' ? mode : '';
 
   function choose(next) {
-    if (window.requestGameLandscape) window.requestGameLandscape();
     var url = new URL(location.href);
     url.searchParams.set('mode', next);
     url.searchParams.delete('room');
