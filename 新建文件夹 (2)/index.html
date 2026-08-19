@@ -65,7 +65,16 @@
         
         <!-- build:js scripts/main.js -->
         <script data-main="js/init.js?browser=1" src="bower_components/requirejs/require.js"></script>
-        <script defer src="mode-selector.js"></script>
+        <script>
+          (function ensureModeSelector(){
+            var params=new URLSearchParams(location.search);
+            if(params.get('mode')||document.getElementById('mode-selector'))return;
+            var panel=document.createElement('section');panel.id='mode-selector';
+            panel.innerHTML='<div class="mode-card"><p class="mode-kicker">FIREBOY · WATERGIRL</p><h1>选择游玩方式</h1><p>两种模式都支持两台设备联机协作。</p><div class="mode-actions"><button data-mode="adventure"><b>闯关模式</b><span>双设备联机 · 房主任选关卡</span></button><button data-mode="message"><b>寄语模式</b><span>专属贺卡 · 邀请同伴通关</span></button></div></div>';
+            document.body.appendChild(panel);
+            panel.querySelectorAll('[data-mode]').forEach(function(button){button.onclick=function(){var url=new URL(location.href);url.searchParams.set('mode',button.dataset.mode);url.searchParams.delete('room');location.href=url.pathname+'?'+url.searchParams.toString();};});
+          }());
+        </script>
         <script defer src="adventure-unlock.js"></script>
         <script defer src="first-level.js"></script>
         <script defer src="two-device.js"></script>
