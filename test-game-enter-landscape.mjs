@@ -7,6 +7,7 @@ assert.match(script, /classList\.add\('in-game'\)/);
 assert.match(script, /screen\.orientation\.lock\('landscape'\)/);
 assert.match(script, /orientation-guard/);
 assert.match(css, /#device-panel\.in-game,#device-panel\.silent-invite\{display:none/);
-assert.match(css, /@media \(orientation:portrait\) and \(max-width:900px\)\{html\.in-game #orientation-guard\{display:flex/);
+assert.match(css, /@media \(orientation:portrait\) and \(max-width:900px\)\{html\.force-landscape #root/);
+assert.match(css, /html\.in-game:not\(\.force-landscape\) #orientation-guard\{display:flex/);
 assert.match(css, /#orientation-guard\{display:none/);
 console.log('首关入场收起面板与移动端横屏引导检查通过');
