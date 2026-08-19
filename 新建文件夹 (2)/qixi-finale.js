@@ -1,13 +1,17 @@
 (function () {
   'use strict';
 
+  if (new URLSearchParams(window.location.search).get('mode') !== 'message') return;
+
   function isFirstLevel(level) {
     return level && level.levelData && Number(level.levelData.id) === 0;
   }
 
   function redirectToFinale() {
-    var room = new URLSearchParams(window.location.search).get('room');
-    window.location.replace('qixi-finale.html' + (room ? '?room=' + encodeURIComponent(room) : ''));
+    var params = new URLSearchParams(window.location.search);
+    var room = params.get('room');
+    var query = 'mode=message' + (room ? '&room=' + encodeURIComponent(room) : '');
+    window.location.replace('qixi-finale.html?' + query);
   }
 
   function patchLevel() {

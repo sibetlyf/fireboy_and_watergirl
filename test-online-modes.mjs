@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { RoomManager } from './online-room.mjs';
+
+const rooms = new RoomManager();
+const adventure = rooms.create({ mode:'adventure' }, 'host');
+assert.equal(adventure.room.mode, 'adventure');
+assert.equal(rooms.snapshot(adventure.room).mode, 'adventure');
+const message = rooms.create({ mode:'message', card:{ to:'小鹿' } }, 'writer');
+assert.equal(message.room.mode, 'message');
+const entry = readFileSync('新建文件夹 (2)/index.html', 'utf8');
+assert.match(entry, /mode-selector\.js/);
+assert.match(entry, /adventure-unlock\.js/);
+const unlock = readFileSync('新建文件夹 (2)/adventure-unlock.js', 'utf8');
+assert.match(unlock, /get\('mode'\) !== 'adventure'/);
+assert.match(unlock, /value\.required = 0/);
+assert.match(unlock, /value\.unlock_key = 'free'/);
+const first = readFileSync('新建文件夹 (2)/first-level.js', 'utf8');
+assert.match(first, /get\('mode'\) !== 'message'/);
+const device = readFileSync('新建文件夹 (2)/two-device.js', 'utf8');
+assert.match(device, /'\?mode='\+mode/);
+assert.match(device, /mode:'message'|mode:mode/);
+const finaleHook = readFileSync('新建文件夹 (2)/qixi-finale.js', 'utf8');
+assert.match(finaleHook, /'mode=message'/);
+assert.match(device, /hookAdventureSelection/);
+assert.match(device, /type:'level-start'/);
+assert.match(device, /silent-invite/);
+console.log('双模式联机与寄语静默受邀结构检查通过');

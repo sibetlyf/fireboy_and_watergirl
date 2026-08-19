@@ -8,7 +8,7 @@ assert.ok(existsSync(page), '缺少独立七夕结局页面');
 const hookSource = readFileSync(hook, 'utf8');
 const pageSource = readFileSync(page, 'utf8');
 assert.match(hookSource, /gameFinish/);
-assert.match(hookSource, /location\.replace\('qixi-finale\.html'/);
+assert.match(hookSource, /qixi-finale\.html\?/);
 assert.match(pageSource, /与其说你美好，不如说，你不可重复/);
 assert.match(pageSource, /class="card"/);
 console.log('七夕首关结算跳转与独立演出结构检查通过');

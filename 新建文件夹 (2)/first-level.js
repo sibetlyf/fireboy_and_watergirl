@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  if (new URLSearchParams(location.search).get('mode') !== 'message') return;
   var FIRST_LEVEL = { id:0, filename:'tutorials/levels/tutorial_forest.json', elements:['forest'], locked:false, required:0, time:300, mobileTime:600, unlock_key:'free' };
   var requested=false, started=false;
 

@@ -39,12 +39,12 @@ wss.on('connection', (socket) => {
     try {
       if (message.type === 'create') {
         detach(playerId); clients.set(playerId, { socket, roomId:null });
-        const created = rooms.create(message.card, playerId); clients.get(playerId).roomId = created.room.id;
+        const created = rooms.create({ mode:message.mode, card:message.card }, playerId); clients.get(playerId).roomId = created.room.id;
         send(socket, { type:'joined', roomId:created.room.id, role:created.role, owner:true }); sendRoom(created.room); return;
       }
       if (message.type === 'join') {
         detach(playerId); clients.set(playerId, { socket, roomId:null });
-        const joined = rooms.join(message.roomId, playerId); clients.get(playerId).roomId = joined.room.id;
+        const joined = rooms.join(message.roomId, playerId, message.mode); clients.get(playerId).roomId = joined.room.id;
         send(socket, { type:'joined', roomId:joined.room.id, role:joined.role }); sendRoom(joined.room); return;
       }
       if (!client.roomId) return;
@@ -52,6 +52,7 @@ wss.on('connection', (socket) => {
       if (message.type === 'input') {
         const input = message.input ?? {}; relay(room, socket, { type:'input', role:player.role, input:{ left:Boolean(input.left), right:Boolean(input.right), up:Boolean(input.up) } });
       }
+      if (message.type === 'level-start' && player.role === 'fire' && message.level) relay(room, socket, { type:'level-start', level:message.level });
       if (message.type === 'state' && player.role === 'fire' && message.state) relay(room, socket, { type:'state', state:message.state });
     } catch (error) { send(socket, { type:'error', message:error.message }); }
   });
