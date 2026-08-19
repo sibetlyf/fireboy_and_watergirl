@@ -60,7 +60,7 @@
     if(!role||!level())return;
     var raw=JSON.stringify(localInput); if(raw!==last){ send({type:'input',input:localInput}); last=raw; }
     if(role==='fire'){ setInput('fire',localInput); setInput('water',remoteInput); var l=level(); send({type:'state',state:{fire:snapshot(l.pers1),water:snapshot(l.pers2)}}); }
-    else { setInput('fire',{left:false,right:false,up:false}); setInput('water',{left:false,right:false,up:false}); }
+    else { setInput('fire',{left:false,right:false,up:false}); }
   },30);
   panel(); connect();
 }());
