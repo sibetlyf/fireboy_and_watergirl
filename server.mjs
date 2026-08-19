@@ -37,6 +37,11 @@ wss.on('connection', (socket) => {
     let message; try { message = JSON.parse(raw.toString()); } catch { return send(socket, { type:'error', message:'无效消息' }); }
     const client = clients.get(playerId); if (!client) return;
     try {
+      if (message.type === 'create') {
+        detach(playerId); clients.set(playerId, { socket, roomId:null });
+        const created = rooms.create(message.card, playerId); clients.get(playerId).roomId = created.room.id;
+        send(socket, { type:'joined', roomId:created.room.id, role:created.role, owner:true }); sendRoom(created.room); return;
+      }
       if (message.type === 'join') {
         detach(playerId); clients.set(playerId, { socket, roomId:null });
         const joined = rooms.join(message.roomId, playerId); clients.get(playerId).roomId = joined.room.id;

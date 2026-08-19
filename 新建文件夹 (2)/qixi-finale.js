@@ -6,7 +6,8 @@
   }
 
   function redirectToFinale() {
-    window.location.replace('qixi-finale.html');
+    var room = new URLSearchParams(window.location.search).get('room');
+    window.location.replace('qixi-finale.html' + (room ? '?room=' + encodeURIComponent(room) : ''));
   }
 
   function patchLevel() {
