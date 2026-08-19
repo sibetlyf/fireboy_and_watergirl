@@ -11,9 +11,11 @@ export class RoomManager {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let id = '';
     do { id = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join(''); } while (this.rooms.has(id)); return id;
   }
+  constellation(value, fallback) { return ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'].includes(value) ? value : fallback; }
   cardConfig(card = {}) {
     const clean = value => String(value ?? '').trim().slice(0, 160);
-    return { to:clean(card.to)||'洛小白', message:clean(card.message)||'愿我们每一次并肩，都走向更辽阔的星河。', from:clean(card.from)||'—— 与你同行' };
+    const legacy = this.constellation(card.constellation, 'taurus');
+    return { to:clean(card.to)||'洛小白', message:clean(card.message)||'愿我们每一次并肩，都走向更辽阔的星河。', from:clean(card.from)||'—— 与你同行', leftConstellation:this.constellation(card.leftConstellation, legacy), rightConstellation:this.constellation(card.rightConstellation, 'cancer') };
   }
   create(options = {}, playerId) {
     const id = this.generatedRoomId(), mode = this.mode(options.mode);
