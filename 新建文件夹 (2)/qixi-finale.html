@@ -36,7 +36,7 @@
 (function(){
  const scene=document.querySelector('#qixi'),fire=document.querySelector('.fire'),water=document.querySelector('.water');let timer,run=0;
  function frame(n){const id=n%2;fire.src='assets/qixi/fire-complete-'+id+'.png';water.src='assets/qixi/water-complete-'+id+'.png'}
- function play(){const ticket=++run;clearInterval(timer);scene.className='';frame(0);requestAnimationFrame(()=>{if(ticket===run)scene.classList.add('card-arrive')});setTimeout(()=>{if(ticket===run)scene.classList.add('card-open')},1150);setTimeout(()=>{if(ticket===run)scene.classList.add('bridge-ready')},1650);setTimeout(()=>{if(ticket===run){scene.classList.add('walk');timer=setInterval(()=>frame(Date.now()/150|0),150)}},2950);setTimeout(()=>{if(ticket===run){scene.classList.add('fuse');clearInterval(timer)}},6250);setTimeout(()=>{if(ticket===run)scene.classList.add('reveal')},7650)}
+ function play(){const ticket=++run;clearInterval(timer);scene.className='';frame(0);requestAnimationFrame(()=>{if(ticket===run)scene.classList.add('card-arrive')});setTimeout(()=>{if(ticket===run)scene.classList.add('card-open')},1150);setTimeout(()=>{if(ticket===run)scene.classList.add('bridge-ready')},1650);setTimeout(()=>{if(ticket===run){scene.classList.add('walk');timer=setInterval(()=>frame(Math.floor(performance.now()/150)%2),150)}},2950);setTimeout(()=>{if(ticket===run){scene.classList.add('fuse');clearInterval(timer)}},6250);setTimeout(()=>{if(ticket===run)scene.classList.add('reveal')},7650)}
  document.querySelector('.replay').addEventListener('click',play);document.querySelector('.back').addEventListener('click',()=>location.replace('index.html'));play();
 }());
 </script>
