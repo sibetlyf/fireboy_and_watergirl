@@ -34,17 +34,10 @@
 
   function controls(){ var root=document.getElementById('mobile-controls'); if(root)return root; root=document.createElement('div'); root.id='mobile-controls'; root.innerHTML='<div class="move-cluster"><button class="move-control" data-key="left" aria-label="向左">◀</button><button class="move-control" data-key="right" aria-label="向右">▶</button></div><button class="move-control jump-control" data-key="up" aria-label="跳跃">跳</button>'; document.body.appendChild(root); root.querySelectorAll('.move-control').forEach(function(button){ var key=button.dataset.key; function down(event){event.preventDefault();localInput[key]=true;button.classList.add('pressed');if(button.setPointerCapture)button.setPointerCapture(event.pointerId);} function up(event){event.preventDefault();localInput[key]=false;button.classList.remove('pressed');} button.addEventListener('pointerdown',down);button.addEventListener('pointerup',up);button.addEventListener('pointercancel',up);button.addEventListener('lostpointercapture',up);button.addEventListener('pointerleave',function(event){if(event.buttons===0)up(event);}); }); return root; }
   function bindKeyboard(){ function keyFor(event){var map=role==='fire'?{ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up'}:{KeyA:'left',KeyD:'right',KeyW:'up'};return map[event.code];} function update(event,down){if(event.target&&/INPUT|TEXTAREA/.test(event.target.tagName))return;var key=keyFor(event);if(!key)return;event.preventDefault();localInput[key]=down;} window.addEventListener('keydown',function(e){update(e,true);});window.addEventListener('keyup',function(e){update(e,false);});window.addEventListener('blur',function(){localInput={left:false,right:false,up:false};}); }
-  function orientationGuard(){
-    var guard=document.getElementById('orientation-guard'); if(guard)return guard;
-    guard=document.createElement('div'); guard.id='orientation-guard';
-    guard.innerHTML='<span>↻</span><strong>请旋转设备</strong><small>横屏体验更完整</small>';
-    document.body.appendChild(guard); return guard;
-  }
   function enterGameMode(){
     panel().classList.add('in-game');
     document.documentElement.classList.add('in-game');
-    orientationGuard();
-    if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(function(){});
+    if(window.requestGameLandscape) window.requestGameLandscape();
   }
   function startAdventureMenu(){
     adventureReady=true; status(role==='fire'?'请选择任意关卡，队友会同步进入':'等待房主选择关卡…');
