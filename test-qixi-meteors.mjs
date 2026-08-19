@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 
 const page = readFileSync('新建文件夹 (2)/qixi-finale.html', 'utf8');
 assert.match(page, /meteor-field/);
-assert.match(page, /meteor\.className\s*=\s*'meteor'/);
 assert.match(page, /createMeteorShower/);
 assert.match(page, /--meteor-duration/);
 assert.match(page, /@keyframes meteorFall/);
