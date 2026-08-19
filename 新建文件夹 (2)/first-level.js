@@ -18,7 +18,8 @@
     var game = window.PIXI && window.PIXI.game;
     if (!game || started || !game.state) return;
     started = true;
-    game.settings.controls = 'dual';
+    // 使用键盘游标对象作为输入接口；移动端输入由 two-device.js 持续写入。
+    game.settings.controls = 'keyboard';
     game.settings.music = true;
     game.settings.fx = true;
     if (game.settingsSignal) game.settingsSignal.dispatch('controls');
@@ -32,10 +33,9 @@
     if (!game || !game.state || !window.require) return setTimeout(requestGame, 250);
     if (requested) return;
     requested = true;
-    window.require(['States/Level/Level'], function (LevelState) {
-      launchFirstLevel(LevelState);
-    });
+    window.require(['States/Level/Level'], function (LevelState) { launchFirstLevel(LevelState); });
   }
 
   window.addEventListener('first-level:start', requestGame, { once: true });
+  if (window.__firstLevelStartRequested) requestGame();
 }());
