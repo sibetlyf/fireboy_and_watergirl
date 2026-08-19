@@ -27,15 +27,15 @@
     game.state.start('level', true, false, FIRST_LEVEL);
   }
 
-  function waitForGame() {
+  function requestGame() {
     var game = window.PIXI && window.PIXI.game;
-    if (!game || !game.state || !window.require) return setTimeout(waitForGame, 250);
+    if (!game || !game.state || !window.require) return setTimeout(requestGame, 250);
     if (requested) return;
     requested = true;
     window.require(['States/Level/Level'], function (LevelState) {
-      setTimeout(function () { launchFirstLevel(LevelState); }, 300);
+      launchFirstLevel(LevelState);
     });
   }
 
-  waitForGame();
+  window.addEventListener('first-level:start', requestGame, { once: true });
 }());
