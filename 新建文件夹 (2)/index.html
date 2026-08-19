@@ -65,6 +65,11 @@
         
         <!-- build:js scripts/main.js -->
         <script data-main="js/init.js?browser=1" src="bower_components/requirejs/require.js"></script>
+        <style id="mode-selector-critical-css">
+          #mode-selector{position:fixed!important;z-index:2147483647!important;inset:0!important;display:grid!important;place-items:center!important;padding:24px!important;background:radial-gradient(circle at 50% 0,#1f4263,#081326 66%,#040a12)!important;color:#f7ecd3!important;font-family:"Microsoft YaHei",sans-serif!important}
+          #mode-selector .mode-card{width:min(760px,94vw)!important;padding:clamp(26px,6vw,62px)!important;border:1px solid rgba(255,224,145,.53)!important;border-radius:20px!important;background:rgba(9,20,38,.96)!important;box-shadow:0 25px 80px rgba(0,0,0,.55)!important;text-align:center!important}
+          #mode-selector h1{margin:6px 0 10px!important;font:500 clamp(30px,5vw,48px) Georgia,"Songti SC",serif!important;letter-spacing:.12em!important}#mode-selector p{color:#c2d1df!important}.mode-kicker{font-size:11px!important;letter-spacing:.25em!important;color:#f4cf78!important}.mode-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:16px!important;margin-top:28px!important}.mode-actions button{display:block!important;min-height:132px!important;padding:18px!important;border:1px solid rgba(255,224,145,.6)!important;border-radius:14px!important;color:#fff7dc!important;background:linear-gradient(145deg,rgba(38,83,113,.9),rgba(15,34,58,.94))!important;cursor:pointer!important;text-align:left!important}.mode-actions b,.mode-actions span{display:block!important}.mode-actions b{margin-bottom:9px!important;font:600 22px Georgia,"Songti SC",serif!important;color:#ffe28a!important}.mode-actions span{color:#c4d5e7!important;font-size:13px!important}@media(max-width:600px){.mode-actions{grid-template-columns:1fr!important}.mode-actions button{min-height:96px!important}}
+        </style>
         <script>
           (function ensureModeSelector(){
             function mount(){
