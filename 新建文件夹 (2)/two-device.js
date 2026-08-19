@@ -34,6 +34,21 @@
     return root;
   }
 
+  function bindKeyboard(){
+    function keyFor(event){
+      var map=role==='fire'?{ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up'}:{KeyA:'left',KeyD:'right',KeyW:'up'};
+      return map[event.code];
+    }
+    function update(event,down){
+      if(event.target&&/INPUT|TEXTAREA/.test(event.target.tagName))return;
+      var key=keyFor(event); if(!key)return;
+      event.preventDefault(); localInput[key]=down;
+    }
+    window.addEventListener('keydown',function(event){update(event,true);});
+    window.addEventListener('keyup',function(event){update(event,false);});
+    window.addEventListener('blur',function(){localInput={left:false,right:false,up:false};});
+  }
+
   function startWhenReady(){
     window.__firstLevelStartRequested=true;
     window.dispatchEvent(new Event('first-level:start'));
@@ -62,5 +77,5 @@
     if(role==='fire'){ setInput('fire',localInput); setInput('water',remoteInput); var l=level(); send({type:'state',state:{fire:snapshot(l.pers1),water:snapshot(l.pers2)}}); }
     else { setInput('fire',{left:false,right:false,up:false}); }
   },30);
-  panel(); connect();
+  panel(); controls(); bindKeyboard(); connect();
 }());
